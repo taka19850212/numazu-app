@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="ja">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
-<style>
-    body {
-        font-family: 'Noto Serif JP', serif;
-        background-color: #121212;
-        color: #e0e0e0;
-    }
-</style>
 
 <head>
     <meta charset="UTF-8">
     <title>沼津ローカルガイド - スポット一覧</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Serif JP', serif;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+    </style>
 </head>
 
 <body style="padding: 50px; text-align: center;">
@@ -22,7 +22,14 @@
         <a href="{{ route('spots.create') }}"
             style="background-color: #0056b3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">＋
             新しいスポットを登録</a>
+
+        <!-- ★修正ポイント1：ここに「❤️ お気に入り」ボタンが追加されています -->
         <div style="margin: 20px 0; text-align: center;">
+            <button id="btn-favorites"
+                style="display: inline-block; padding: 6px 20px; margin-right: 10px; background-color: #b85c5c; color: white; border: none; border-radius: 20px; font-size: 0.9em; letter-spacing: 1px; cursor: pointer; font-family: inherit;">
+                ❤️ お気に入り
+            </button>
+
             <a href="{{ route('spots.index') }}"
                 style="display: inline-block; padding: 6px 20px; margin-right: 10px; background-color: transparent; color: #e0e0e0; text-decoration: none; border: 1px solid #777; border-radius: 20px; font-size: 0.9em; letter-spacing: 1px;">
                 すべて
@@ -40,19 +47,18 @@
     <div
         style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 40px; max-width: 1000px; margin: 40px auto; padding: 0 20px;">
 
-
         @foreach($spots as $spot)
-            <!-- カード全体（position: relative を追加して、お気に入りボタンを右上に配置できるようにします） -->
-            <div
+            <!-- ★修正ポイント2：class="spot-card-container" と data-spot-id を追加しています -->
+            <div class="spot-card-container" data-spot-id="{{ $spot->id }}"
                 style="background-color: #1e1e1e; border: 1px solid #333; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; display: flex; flex-direction: column; position: relative;">
 
-                <!-- ★新規追加：お気に入り（ブックマーク）ボタン -->
+                <!-- お気に入り（ブックマーク）ボタン -->
                 <button class="bookmark-btn" data-spot-id="{{ $spot->id }}" onclick="toggleBookmark({{ $spot->id }}, this)"
                     style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5em; cursor: pointer; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
                     🤍
                 </button>
 
-                <!-- ★修正：写真をクリック可能に（display: block を追加して隙間をなくします） -->
+                <!-- 写真 -->
                 <a href="{{ route('spots.show', $spot->id) }}" style="display: block; text-decoration: none;">
                     <img src="{{ asset($spot->image_path) }}" alt="{{ $spot->name }}"
                         style="width: 100%; height: 200px; object-fit: cover; transition: 0.3s;"
@@ -110,28 +116,25 @@
         @endforeach
 
     </div>
-    <!-- ★ここからJavaScript（ブックマークの魔法） -->
+
+    <!-- JavaScript（ブックマークの魔法） -->
     <script>
-        // 1. お気に入りボタンが押された時の処理
+        // 1. お気に入りボタンが押された時の処理（既存）
         function toggleBookmark(spotId, btnElement) {
-            // スマホ（ブラウザ）の記憶領域から、保存済みのリストを取り出す
             let bookmarks = JSON.parse(localStorage.getItem('numazu_bookmarks')) || [];
             let index = bookmarks.indexOf(spotId);
 
             if (index === -1) {
-                // まだお気に入りされていなかったら、追加して赤ハートにする！
                 bookmarks.push(spotId);
                 btnElement.innerText = '❤️';
             } else {
-                // すでにお気に入りされていたら、削除して白ハートに戻す！
                 bookmarks.splice(index, 1);
                 btnElement.innerText = '🤍';
             }
-            // 変更したリストを、再びスマホに保存し直す
             localStorage.setItem('numazu_bookmarks', JSON.stringify(bookmarks));
         }
 
-        // 2. 画面が開かれた時に、すでにお気に入り済みのものを赤ハートにする処理
+        // 2. 画面が開かれた時の処理（既存）
         document.addEventListener("DOMContentLoaded", function () {
             let bookmarks = JSON.parse(localStorage.getItem('numazu_bookmarks')) || [];
             document.querySelectorAll('.bookmark-btn').forEach(btn => {
@@ -141,8 +144,42 @@
                 }
             });
         });
+
+        // ★修正ポイント3：ここから新規追加（お気に入り絞り込み機能）
+        const btnFavorites = document.getElementById('btn-favorites');
+        const allSpotCards = document.querySelectorAll('.spot-card-container');
+        let isShowingFavorites = false;
+
+        btnFavorites.addEventListener('click', function () {
+            let bookmarks = JSON.parse(localStorage.getItem('numazu_bookmarks')) || [];
+
+            if (!isShowingFavorites) {
+                // お気に入りだけを表示する
+                allSpotCards.forEach(card => {
+                    let spotId = parseInt(card.getAttribute('data-spot-id'));
+                    if (!bookmarks.includes(spotId)) {
+                        card.style.display = 'none';
+                    } else {
+                        card.style.display = 'block';
+                    }
+                });
+
+                btnFavorites.innerText = '❌ お気に入りを解除';
+                btnFavorites.style.backgroundColor = '#444';
+                isShowingFavorites = true;
+
+            } else {
+                // 全表示に戻す
+                allSpotCards.forEach(card => {
+                    card.style.display = 'block';
+                });
+
+                btnFavorites.innerText = '❤️ お気に入り';
+                btnFavorites.style.backgroundColor = '#b85c5c';
+                isShowingFavorites = false;
+            }
+        });
     </script>
-    <!-- ★ここまでJavaScript -->
 </body>
 
 </html>
