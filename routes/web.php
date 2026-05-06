@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\SpotController;
+use App\Http\Controllers\BookmarkController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -14,4 +15,6 @@ Route::delete('/spots/{spot}',[SpotController::class,'destroy'])->name('spots.de
 Route::get('/spots/{spot}/edit',[SpotController::class,'edit'])->name('spots.edit');
 Route::put('/spots/{spot}',[SpotController::class,'update'])->name('spots.update');
 Route::get('/spots/{spot}', [SpotController::class, 'show'])->name('spots.show');
+Route::post('/bookmarks/toggle/{spot}', [BookmarkController::class, 'toggle'])->name('bookmarks.toggle');
+
 
