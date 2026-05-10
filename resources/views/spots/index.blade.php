@@ -104,34 +104,60 @@
     </div>
 
     <script>
-        // 1. お気に入りボタン（ハート）が押された時の処理
+        // 1. お気に入りボタン（ハート）が押された時の処理（DB連携版）
         function toggleBookmark(spotId, btnElement) {
-            let bookmarks = JSON.parse(localStorage.getItem('numazu_bookmarks')) || [];
-            let index = bookmarks.indexOf(spotId);
+            // Laravelの裏側（Controller）へデータを送りに行く魔法
+            fetch(`/bookmarks/toggle/${spotId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}', // Laravelのセキュリティ対策
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'added') {
+                    // DBに保存できたらハートを赤にする
+                    btnElement.innerText = '❤️';
+                    updateLocalBookmarks(spotId, 'add');
+                } else if (data.status === 'removed') {
+                    // DBから削除できたらハートを白にする
+                    btnElement.innerText = '🤍';
+                    updateLocalBookmarks(spotId, 'remove');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('通信に失敗しました。ログイン状態などを確認してください。');
+            });
+        }
 
-            if (index === -1) {
-                bookmarks.push(spotId);
-                btnElement.innerText = '❤️';
+        // ★追加：絞り込み機能と同期させるための補助関数
+        function updateLocalBookmarks(spotId, action) {
+            let bookmarks = JSON.parse(localStorage.getItem('numazu_bookmarks')) || [];
+            if (action === 'add') {
+                if (!bookmarks.includes(spotId)) bookmarks.push(spotId);
             } else {
-                bookmarks.splice(index, 1);
-                btnElement.innerText = '🤍';
+                bookmarks = bookmarks.filter(id => id !== spotId);
             }
             localStorage.setItem('numazu_bookmarks', JSON.stringify(bookmarks));
+            
+            // もし「お気に入り中」モードなら、解除した瞬間にカードを消す
+            if (isShowingFavorites && action === 'remove') {
+                applyFavoriteFilter();
+            }
         }
 
         // 2. お気に入り絞り込み機能の設定
         const btnFavorites = document.getElementById('btn-favorites');
         const allSpotCards = document.querySelectorAll('.spot-card-container');
         
-        // ★修正：sessionStorageを使って「ページを移動しても絞り込み状態をキープ」します
         let isShowingFavorites = sessionStorage.getItem('numazu_is_showing_favorites') === 'true';
 
-        // 絞り込みを実行する魔法の関数
         function applyFavoriteFilter() {
             let bookmarks = JSON.parse(localStorage.getItem('numazu_bookmarks')) || [];
 
             if (isShowingFavorites) {
-                // お気に入りのみ表示
                 allSpotCards.forEach(card => {
                     let spotId = parseInt(card.getAttribute('data-spot-id'));
                     if (!bookmarks.includes(spotId)) {
@@ -143,7 +169,6 @@
                 btnFavorites.innerText = '❌ お気に入りを解除';
                 btnFavorites.style.backgroundColor = '#444';
             } else {
-                // 全表示
                 allSpotCards.forEach(card => {
                     card.style.display = 'block';
                 });
@@ -154,7 +179,6 @@
 
         // 3. 画面が開かれた時の処理
         document.addEventListener("DOMContentLoaded", function () {
-            // ハートマークの復元
             let bookmarks = JSON.parse(localStorage.getItem('numazu_bookmarks')) || [];
             document.querySelectorAll('.bookmark-btn').forEach(btn => {
                 let spotId = parseInt(btn.getAttribute('data-spot-id'));
@@ -163,15 +187,14 @@
                 }
             });
             
-            // ★修正：画面が開いた瞬間に、前回のお気に入り絞り込み状態を復元する
             applyFavoriteFilter();
         });
 
         // 4. トップのお気に入りボタンが押された時の処理
         btnFavorites.addEventListener('click', function () {
-            isShowingFavorites = !isShowingFavorites; // 状態を反転させる
-            sessionStorage.setItem('numazu_is_showing_favorites', isShowingFavorites); // 状態をブラウザに記憶させる
-            applyFavoriteFilter(); // フィルターを実行
+            isShowingFavorites = !isShowingFavorites;
+            sessionStorage.setItem('numazu_is_showing_favorites', isShowingFavorites);
+            applyFavoriteFilter();
         });
     </script>
 </body>
