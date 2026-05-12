@@ -38,14 +38,15 @@
             @foreach($categories as $category)
                 <a href="{{ route('spots.index', ['category_id' => $category->id]) }}"
                     style="display: inline-block; padding: 6px 20px; margin-right: 10px; text-decoration: none; border-radius: 20px; font-size: 0.9em; letter-spacing: 1px; transition: 0.3s;
-                    {{ request('category_id') == $category->id ? 'background-color: #e0e0e0; color: #121212; font-weight: bold;' : 'background-color: transparent; color: #e0e0e0; border: 1px solid #777;' }}">
+                                {{ request('category_id') == $category->id ? 'background-color: #e0e0e0; color: #121212; font-weight: bold;' : 'background-color: transparent; color: #e0e0e0; border: 1px solid #777;' }}">
                     {{ $category->name }}
                 </a>
             @endforeach
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 40px; max-width: 1000px; margin: 40px auto; padding: 0 20px;">
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 40px; max-width: 1000px; margin: 40px auto; padding: 0 20px;">
 
         @foreach($spots as $spot)
             <div class="spot-card-container" data-spot-id="{{ $spot->id }}"
@@ -61,8 +62,13 @@
                         style="width: 100%; height: 200px; object-fit: cover; transition: 0.3s;"
                         onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
                 </a>
-
-                <div style="padding: 20px; display: flex; flex-direction: column; flex-grow: 1; background-color: #2c3e50; border-radius: 0 0 8px 8px;">
+                <button class="bookmark-btn" data-spot-id="{{ $spot->id }}" onclick="toggleBookmark({{ $spot->id }}, this)"
+                    style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5em; cursor: pointer; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+                    {{-- ★ここが魔法：DBのリストに含まれていれば最初から❤️にする --}}
+                    {{ in_array($spot->id, $bookmarkedSpotIds) ? '❤️' : '🤍' }}
+                </button>
+                <div
+                    style="padding: 20px; display: flex; flex-direction: column; flex-grow: 1; background-color: #2c3e50; border-radius: 0 0 8px 8px;">
 
                     <p style="font-size: 0.8em; color: #aaa; margin-bottom: 8px;">
                         {{ $spot->category->name ?? '未分類' }}
@@ -70,9 +76,15 @@
 
                     <h3 style="margin: 0 0 15px 0; font-size: 1.2em; color: #e0e0e0;">
                         <div style="margin-bottom: 15px;">
-                            @if($spot->is_halal_friendly) <span style="display: inline-block; background-color: #d4af37; color: #111; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: bold; margin-right: 5px; margin-bottom: 5px;">🕌 Halal</span> @endif
-                            @if($spot->is_private_booking) <span style="display: inline-block; background-color: #d4af37; color: #111; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: bold; margin-right: 5px; margin-bottom: 5px;">🗝️ Private</span> @endif
-                            @if($spot->is_english_friendly) <span style="display: inline-block; background-color: #d4af37; color: #111; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: bold; margin-right: 5px; margin-bottom: 5px;">🗣️ English</span> @endif
+                            @if($spot->is_halal_friendly) <span
+                                style="display: inline-block; background-color: #d4af37; color: #111; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: bold; margin-right: 5px; margin-bottom: 5px;">🕌
+                            Halal</span> @endif
+                            @if($spot->is_private_booking) <span
+                                style="display: inline-block; background-color: #d4af37; color: #111; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: bold; margin-right: 5px; margin-bottom: 5px;">🗝️
+                            Private</span> @endif
+                            @if($spot->is_english_friendly) <span
+                                style="display: inline-block; background-color: #d4af37; color: #111; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: bold; margin-right: 5px; margin-bottom: 5px;">🗣️
+                            English</span> @endif
                         </div>
                         {{ $spot->name }}
                     </h3>
@@ -88,7 +100,8 @@
                         </div>
                     @endif
 
-                    <div style="display: flex; justify-content: center; gap: 15px; border-top: 1px solid #333; padding-top: 15px;">
+                    <div
+                        style="display: flex; justify-content: center; gap: 15px; border-top: 1px solid #333; padding-top: 15px;">
                         <a href="{{ route('spots.edit', $spot->id) }}"
                             style="display: inline-block; padding: 8px 24px; background-color: #444; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9em;">編集</a>
                         <form action="{{ route('spots.destroy', $spot->id) }}" method="POST" style="margin: 0;">
@@ -106,33 +119,30 @@
     <script>
         // 1. お気に入りボタン（ハート）が押された時の処理（DB連携版）
         function toggleBookmark(spotId, btnElement) {
-            // Laravelの裏側（Controller）へデータを送りに行く魔法
             fetch(`/bookmarks/toggle/${spotId}`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}', // Laravelのセキュリティ対策
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'added') {
-                    // DBに保存できたらハートを赤にする
-                    btnElement.innerText = '❤️';
-                    updateLocalBookmarks(spotId, 'add');
-                } else if (data.status === 'removed') {
-                    // DBから削除できたらハートを白にする
-                    btnElement.innerText = '🤍';
-                    updateLocalBookmarks(spotId, 'remove');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('通信に失敗しました。ログイン状態などを確認してください。');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'added') {
+                        btnElement.innerText = '❤️';
+                        updateLocalBookmarks(spotId, 'add');
+                    } else if (data.status === 'removed') {
+                        btnElement.innerText = '🤍';
+                        updateLocalBookmarks(spotId, 'remove');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('通信に失敗しました。ログイン状態などを確認してください。');
+                });
         }
 
-        // ★追加：絞り込み機能と同期させるための補助関数
+        // 絞り込み機能と同期させるための補助関数
         function updateLocalBookmarks(spotId, action) {
             let bookmarks = JSON.parse(localStorage.getItem('numazu_bookmarks')) || [];
             if (action === 'add') {
@@ -141,8 +151,7 @@
                 bookmarks = bookmarks.filter(id => id !== spotId);
             }
             localStorage.setItem('numazu_bookmarks', JSON.stringify(bookmarks));
-            
-            // もし「お気に入り中」モードなら、解除した瞬間にカードを消す
+
             if (isShowingFavorites && action === 'remove') {
                 applyFavoriteFilter();
             }
@@ -151,13 +160,15 @@
         // 2. お気に入り絞り込み機能の設定
         const btnFavorites = document.getElementById('btn-favorites');
         const allSpotCards = document.querySelectorAll('.spot-card-container');
-        
+
         let isShowingFavorites = sessionStorage.getItem('numazu_is_showing_favorites') === 'true';
 
+        // 絞り込みを実行する魔法の関数
         function applyFavoriteFilter() {
             let bookmarks = JSON.parse(localStorage.getItem('numazu_bookmarks')) || [];
 
             if (isShowingFavorites) {
+                // 【お気に入りモード】
                 allSpotCards.forEach(card => {
                     let spotId = parseInt(card.getAttribute('data-spot-id'));
                     if (!bookmarks.includes(spotId)) {
@@ -166,27 +177,31 @@
                         card.style.display = 'block';
                     }
                 });
-                btnFavorites.innerText = '❌ お気に入りを解除';
-                btnFavorites.style.backgroundColor = '#444';
+                btnFavorites.innerText = '❌ お気に入り解除';
+                btnFavorites.style.backgroundColor = '#e0e0e0';
+                btnFavorites.style.color = '#121212';
+                btnFavorites.style.fontWeight = 'bold';
             } else {
+                // 【通常モード】
                 allSpotCards.forEach(card => {
                     card.style.display = 'block';
                 });
                 btnFavorites.innerText = '❤️ お気に入り';
                 btnFavorites.style.backgroundColor = '#b85c5c';
+                btnFavorites.style.color = 'white';
+                btnFavorites.style.fontWeight = 'normal';
             }
         }
 
         // 3. 画面が開かれた時の処理
         document.addEventListener("DOMContentLoaded", function () {
-            let bookmarks = JSON.parse(localStorage.getItem('numazu_bookmarks')) || [];
-            document.querySelectorAll('.bookmark-btn').forEach(btn => {
-                let spotId = parseInt(btn.getAttribute('data-spot-id'));
-                if (bookmarks.includes(spotId)) {
-                    btn.innerText = '❤️';
-                }
-            });
-            
+            // PHPから渡されたお気に入りリストをJavaScriptで受け取る
+            const dbBookmarks = @json($bookmarkedSpotIds);
+
+            // LocalStorageに最新の状態を保存
+            localStorage.setItem('numazu_bookmarks', JSON.stringify(dbBookmarks));
+
+            // 絞り込み状態であればフィルターを適用
             applyFavoriteFilter();
         });
 

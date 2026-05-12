@@ -9,16 +9,29 @@ use App\Models\Category;
 class SpotController extends Controller
 {
     public function index(Request $request)
-    {
-        $categories = category::all();
-        if ($request->has('category_id')) {
-            $spots = Spot::where('category_id', $request->category_id)->get();
-        } else {
-            $spots = Spot::all();
-        }
+{
+    // 1. カテゴリー一覧を取得
+    $categories = Category::all();
 
-        return view('spots.index', compact('spots', 'categories'));
+    // 2. スポット一覧のクエリを準備
+    $query = Spot::query();
+
+    // 3. カテゴリーで絞り込みがある場合
+    if ($request->filled('category_id')) {
+        $query->where('category_id', $request->category_id);
     }
+
+    $spots = $query->get();
+
+    // ★ 4. ここが重要！DBから「ユーザーID:1」のお気に入りスポットIDだけを抜き出します
+    // pluck('spot_id') は「spot_idの列だけを引っこ抜く」という便利な命令です
+    $bookmarkedSpotIds = \App\Models\Bookmark::where('user_id', 1)
+                            ->pluck('spot_id')
+                            ->toArray();
+
+    // 5. すべてのデータをビューに渡す
+    return view('spots.index', compact('spots', 'categories', 'bookmarkedSpotIds'));
+}
 
 
     public function create()
