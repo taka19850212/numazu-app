@@ -300,32 +300,34 @@
       <!-- Destinations Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
         @foreach($spots as $spot)
-          <!-- Dynamic Spot Card -->
-          <div class="destination-card group relative aspect-[4/3] overflow-hidden cursor-pointer">
-            <!-- 背景画像：public/images フォルダを直接見に行きます -->
-            <div class="destination-image absolute inset-0 bg-cover bg-center transition-transform duration-700"
-              style="background-image: url('{{ asset($spot->image_path) }}');"></div>
 
-            <div class="destination-overlay absolute inset-0 bg-charcoal/30 transition-colors duration-500"></div>
+          <a href="{{ route('spots.show', $spot->id) }}" class="block group">
+            <div class="destination-card relative aspect-[4/3] overflow-hidden cursor-pointer">
 
-            <div class="absolute inset-0 p-8 lg:p-12 flex flex-col justify-end">
-              <span class="text-xs font-montserrat tracking-[0.3em] text-ivory/80 uppercase">Numazu, Japan</span>
+              <div class="destination-image absolute inset-0 bg-cover bg-center transition-transform duration-700"
+                style="background-image: url('{{ asset($spot->image_path) }}');"></div>
 
-              <!-- タイトル： $spot->name に修正 -->
-              <h3 class="text-2xl md:text-3xl lg:text-4xl font-light text-ivory mt-2 tracking-wide">{{ $spot->name }}</h3>
+              <div class="destination-overlay absolute inset-0 bg-charcoal/30 transition-colors duration-500"></div>
 
-              <!-- 説明文 -->
-              <p class="text-sm font-montserrat text-ivory/80 mt-3 max-w-xs line-clamp-2">{{ $spot->description }}</p>
+              <div class="absolute inset-0 p-8 lg:p-12 flex flex-col justify-end">
+                <span class="text-xs font-montserrat tracking-[0.3em] text-ivory/80 uppercase">Numazu, Japan</span>
 
-              <div
-                class="destination-arrow flex items-center gap-3 mt-6 opacity-0 translate-y-4 transition-all duration-300">
-                <span class="text-sm font-montserrat tracking-[0.2em] text-ivory uppercase">Explore</span>
-                <svg class="w-4 h-4 text-ivory" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
+                <h3 class="text-2xl md:text-3xl lg:text-4xl font-light text-ivory mt-2 tracking-wide">{{ $spot->name }}
+                </h3>
+
+                <p class="text-sm font-montserrat text-ivory/80 mt-3 max-w-xs line-clamp-2">{{ $spot->description }}</p>
+
+                <div
+                  class="destination-arrow flex items-center gap-3 mt-6 opacity-0 translate-y-4 transition-all duration-300">
+                  <span class="text-sm font-montserrat tracking-[0.2em] text-ivory uppercase">Explore</span>
+                  <svg class="w-4 h-4 text-ivory" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
               </div>
             </div>
-          </div>
+          </a>
         @endforeach
       </div>
 
