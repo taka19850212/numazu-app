@@ -80,5 +80,89 @@
             });
         });
     </script>
+    <div id="inquireModal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-500 ease-in-out">
+        <div class="absolute inset-0 bg-charcoal/80 backdrop-blur-sm" id="modalBackdrop"></div>
+        
+        <div class="absolute inset-0 flex items-center justify-center p-4 md:p-8">
+            <div id="modalContent" class="bg-ivory w-full max-w-2xl p-8 md:p-16 relative transform scale-95 transition-transform duration-500 ease-out">
+                
+                <button id="closeModalBtn" class="absolute top-6 right-6 md:top-8 md:right-8 text-charcoal/50 hover:text-charcoal transition-colors duration-300">
+                    <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <div class="mb-10 text-center">
+                    <span class="block text-xs font-montserrat tracking-[0.3em] text-charcoal/50 uppercase mb-3">Private Inquiry</span>
+                    <h3 class="text-3xl md:text-4xl font-light text-charcoal">{{ $spot->name }}</h3>
+                </div>
+
+                <form action="#" method="POST" class="space-y-8">
+                    @csrf
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="relative">
+                            <input type="text" id="name" name="name" class="w-full bg-transparent border-b border-charcoal/20 py-2 text-charcoal font-montserrat text-sm focus:outline-none focus:border-charcoal transition-colors duration-300 peer" placeholder=" " required>
+                            <label for="name" class="absolute left-0 top-2 text-charcoal/50 font-montserrat text-xs tracking-wider uppercase transition-all duration-300 peer-focus:-top-4 peer-focus:text-[10px] peer-valid:-top-4 peer-valid:text-[10px]">Full Name</label>
+                        </div>
+                        <div class="relative">
+                            <input type="email" id="email" name="email" class="w-full bg-transparent border-b border-charcoal/20 py-2 text-charcoal font-montserrat text-sm focus:outline-none focus:border-charcoal transition-colors duration-300 peer" placeholder=" " required>
+                            <label for="email" class="absolute left-0 top-2 text-charcoal/50 font-montserrat text-xs tracking-wider uppercase transition-all duration-300 peer-focus:-top-4 peer-focus:text-[10px] peer-valid:-top-4 peer-valid:text-[10px]">Email Address</label>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <textarea id="message" name="message" rows="3" class="w-full bg-transparent border-b border-charcoal/20 py-2 text-charcoal font-montserrat text-sm focus:outline-none focus:border-charcoal transition-colors duration-300 peer resize-none" placeholder=" " required></textarea>
+                        <label for="message" class="absolute left-0 top-2 text-charcoal/50 font-montserrat text-xs tracking-wider uppercase transition-all duration-300 peer-focus:-top-4 peer-focus:text-[10px] peer-valid:-top-4 peer-valid:text-[10px]">Special Requests or Questions</label>
+                    </div>
+
+                    <div class="pt-4 text-center">
+                        <button type="submit" class="w-full md:w-auto px-12 py-4 bg-charcoal text-white text-xs font-montserrat tracking-[0.2em] uppercase hover:bg-black transition-colors duration-300">
+                            Send Inquiry
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 要素の取得
+            const modal = document.getElementById('inquireModal');
+            const modalContent = document.getElementById('modalContent');
+            const backdrop = document.getElementById('modalBackdrop');
+            const closeBtn = document.getElementById('closeModalBtn');
+            
+            // ページ内にある「Inquire About This Experience」ボタンにIDを追加するか、クラスで取得します
+            // （※元のボタンに id="openModalBtn" を追加してください）
+            const openBtn = document.getElementById('openModalBtn');
+
+            // 開く処理
+            openBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                modal.classList.remove('hidden');
+                // 少しだけ遅らせてopacityを1にすることで、CSSのtransitionを効かせる
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    modalContent.classList.remove('scale-95');
+                    modalContent.classList.add('scale-100');
+                }, 10);
+            });
+
+            // 閉じる処理の関数
+            const closeModal = function() {
+                modal.classList.add('opacity-0');
+                modalContent.classList.remove('scale-100');
+                modalContent.classList.add('scale-95');
+                // アニメーションが終わってからhiddenを追加する
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 500); // duration-500 と合わせる
+            };
+
+            // 閉じるボタンと背景クリックで閉じるようにする
+            closeBtn.addEventListener('click', closeModal);
+            backdrop.addEventListener('click', closeModal);
+        });
+    </script>
 </body>
 </html>
