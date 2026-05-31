@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Spot;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Http\Requests\ReserveConsultationRequest;
 
 class SpotController extends Controller
 {
@@ -112,4 +113,12 @@ class SpotController extends Controller
     {
         return view('spots.show', compact('spot'));
     }
+    public function reserve(ReserveConsultationRequest $request, Spot $spot)
+    {
+        // ※将来はここでデータベースに保存したり、メールを送ったりします
+        // 今回は「成功しました」というメッセージと共に、元のページに戻す処理だけ書きます
+
+        return back()->with('success', 'ご相談リクエストを承りました。後ほど、担当ガイドより特別なご提案をお送りいたします。');
+    }
 }
+

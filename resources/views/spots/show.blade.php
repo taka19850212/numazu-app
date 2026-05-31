@@ -1,168 +1,86 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <title>{{ $spot->name }} - VIP Local Guide</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $spot->name }} | ÉLYSÉE VOYAGES</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@200;300;400&family=Shippori+Mincho:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Noto Serif JP', serif; background-color: #121212; color: #e0e0e0; margin: 0; padding: 0; }
-        
-        /* ★ 修正1: 写真が引き伸ばされないように「contain」に変更し、黒背景でシネマティックに */
-        .hero { width: 100%; max-height: 450px; object-fit: contain; background-color: #050505; display: block; margin: 0 auto; }
-        
-        /* コンテナの配置を調整 */
-        .container { max-width: 800px; margin: 30px auto 50px; background-color: #1e1e1e; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; }
+        body { background-color: #FAF8F5; color: #2C2C2C; }
+        .font-serif { font-family: 'Cormorant Garamond', serif; }
+        .font-sans { font-family: 'Montserrat', sans-serif; }
     </style>
 </head>
-<body>
-    <!-- 写真エリア -->
-    <img src="{{ asset($spot->image_path) }}" class="hero" alt="{{ $spot->name }}">
-    
-    <div class="container">
-        <!-- ★ 修正2: お気に入りボタンを右上に配置 -->
-        <button class="bookmark-btn" data-spot-id="{{ $spot->id }}" onclick="toggleBookmark({{ $spot->id }}, this)"
-                style="position: absolute; top: 30px; right: 30px; background: rgba(255,255,255,0.05); border: 1px solid #444; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5em; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
-            🤍
-        </button>
+<body class="min-h-screen flex flex-col selection:bg-[#2C2C2C] selection:text-[#FAF8F5]">
 
-        <!-- カテゴリとタイトル -->
-        <p style="color: #d4af37; font-weight: bold; letter-spacing: 2px; margin-bottom: 5px;">{{ $spot->category->name ?? 'Category' }}</p>
-        <h1 style="font-size: 2.5em; margin-top: 0; color: #fff;">{{ $spot->name }}</h1>
-        
-        <!-- VIPバッジ -->
-        <div style="margin-bottom: 30px;">
-            @if($spot->is_halal_friendly)<span style="background: #d4af37; color: #111; padding: 5px 12px; border-radius: 15px; font-weight: bold; margin-right: 10px;">🕌 Halal</span>@endif
-            @if($spot->is_private_booking)<span style="background: #d4af37; color: #111; padding: 5px 12px; border-radius: 15px; font-weight: bold; margin-right: 10px;">🗝️ Private</span>@endif
-            @if($spot->is_english_friendly)<span style="background: #d4af37; color: #111; padding: 5px 12px; border-radius: 15px; font-weight: bold;">🗣️ English</span>@endif
-        </div>
+    <header class="w-full px-8 md:px-16 py-12 flex justify-between items-center absolute top-0 z-50">
+        <a href="{{ url('/') }}" class="text-xs font-sans tracking-[0.4em] uppercase text-white hover:opacity-50 transition-opacity">Élysée</a>
+        <a href="{{ url('/') }}" class="text-[10px] font-sans tracking-[0.3em] uppercase text-white hover:opacity-50 transition-opacity">Back to Top</a>
+    </header>
 
-        <!-- 説明文 -->
-        <p style="font-size: 1.2em; line-height: 1.8; color: #ccc; margin-bottom: 40px;">
-            {!! nl2br(e($spot->description)) !!}
-        </p>
-
-        <!-- マップボタン -->
-        <div style="text-align: center;">
-            @if($spot->map_url)
-                <a href="{{ $spot->map_url }}" target="_blank" style="display: inline-block; background-color: #4285F4; color: white; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-size: 1.1em; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.4);">📍 Open in Google Maps</a>
-            @endif
-        </div>
-
-        <!-- 一覧へ戻るボタン -->
-        <div style="text-align: center; margin-top: 50px;">
-            <a href="{{ route('spots.index') }}" style="color: #888; text-decoration: none; border-bottom: 1px solid #888; padding-bottom: 2px;">← Back to Discovery (一覧へ戻る)</a>
-        </div>
+    <div class="w-full h-[70vh] relative">
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ asset($spot->image_path) }}');"></div>
+        <div class="absolute inset-0 bg-black/20"></div>
     </div>
 
-    <!-- ★ 修正3: 詳細ページにもブックマークの魔法（JavaScript）を追加 -->
-    <script>
-        function toggleBookmark(spotId, btnElement) {
-            let bookmarks = JSON.parse(localStorage.getItem('numazu_bookmarks')) || [];
-            let index = bookmarks.indexOf(spotId);
-            
-            if (index === -1) {
-                bookmarks.push(spotId);
-                btnElement.innerText = '❤️';
-            } else {
-                bookmarks.splice(index, 1);
-                btnElement.innerText = '🤍';
-            }
-            localStorage.setItem('numazu_bookmarks', JSON.stringify(bookmarks));
-        }
+    <main class="max-w-4xl mx-auto px-8 py-32 md:py-48 text-center">
+        <span class="text-sm md:text-base font-sans tracking-[0.3em] text-[#2C2C2C]/60 uppercase mb-8 block">Shizuoka, Japan</span>
+        <h1 class="text-5xl md:text-7xl font-serif font-light text-[#2C2C2C] tracking-wide mb-16">{{ $spot->name }}</h1>
+        <div class="w-16 h-[1px] bg-[#2C2C2C]/30 mx-auto mb-16"></div>
+        <p class="text-xl md:text-2xl font-serif font-light tracking-wide leading-loose text-[#2C2C2C]/85">
+            {{ $spot->description }}
+        </p>
+    </main>
 
-        document.addEventListener("DOMContentLoaded", function() {
-            let bookmarks = JSON.parse(localStorage.getItem('numazu_bookmarks')) || [];
-            document.querySelectorAll('.bookmark-btn').forEach(btn => {
-                let spotId = parseInt(btn.getAttribute('data-spot-id'));
-                if (bookmarks.includes(spotId)) {
-                    btn.innerText = '❤️';
-                }
-            });
-        });
-    </script>
-    <div id="inquireModal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-500 ease-in-out">
-        <div class="absolute inset-0 bg-charcoal/80 backdrop-blur-sm" id="modalBackdrop"></div>
-        
-        <div class="absolute inset-0 flex items-center justify-center p-4 md:p-8">
-            <div id="modalContent" class="bg-ivory w-full max-w-2xl p-8 md:p-16 relative transform scale-95 transition-transform duration-500 ease-out">
-                
-                <button id="closeModalBtn" class="absolute top-6 right-6 md:top-8 md:right-8 text-charcoal/50 hover:text-charcoal transition-colors duration-300">
-                    <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+    <section class="w-full bg-white px-8 py-32 border-t border-[#2C2C2C]/10">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-24">
+                <h2 class="text-3xl md:text-4xl font-serif font-light text-[#2C2C2C] tracking-wide mb-6">Personal Consultation</h2>
+                <p class="text-sm md:text-base font-sans tracking-widest leading-loose text-[#2C2C2C]/60">
+                    ご希望の日程やスタイルをお聞かせください。<br>あなただけの特別な体験をご提案いたします。
+                </p>
+            </div>
 
-                <div class="mb-10 text-center">
-                    <span class="block text-xs font-montserrat tracking-[0.3em] text-charcoal/50 uppercase mb-3">Private Inquiry</span>
-                    <h3 class="text-3xl md:text-4xl font-light text-charcoal">{{ $spot->name }}</h3>
+            @if(session('success'))
+                <div class="mb-12 p-6 border border-[#2C2C2C]/20 text-center font-sans tracking-wider text-[#2C2C2C] bg-[#FAF8F5]">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            <form action="{{ route('spots.reserve', $spot->id) }}" method="POST" class="flex flex-col gap-12 font-sans">
+                @csrf
+
+                <div>
+                    <label class="block text-xs tracking-[0.2em] uppercase text-[#2C2C2C]/60 mb-4">Preferred Date</label>
+                    <input type="date" name="date" value="{{ old('date') }}" 
+                           class="w-full bg-transparent border-b border-[#2C2C2C]/30 pb-4 text-lg focus:border-[#2C2C2C] outline-none transition-colors">
+                    @error('date') <p class="text-red-500 text-xs tracking-widest mt-2">{{ $message }}</p> @enderror
                 </div>
 
-                <form action="#" method="POST" class="space-y-8">
-                    @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="relative">
-                            <input type="text" id="name" name="name" class="w-full bg-transparent border-b border-charcoal/20 py-2 text-charcoal font-montserrat text-sm focus:outline-none focus:border-charcoal transition-colors duration-300 peer" placeholder=" " required>
-                            <label for="name" class="absolute left-0 top-2 text-charcoal/50 font-montserrat text-xs tracking-wider uppercase transition-all duration-300 peer-focus:-top-4 peer-focus:text-[10px] peer-valid:-top-4 peer-valid:text-[10px]">Full Name</label>
-                        </div>
-                        <div class="relative">
-                            <input type="email" id="email" name="email" class="w-full bg-transparent border-b border-charcoal/20 py-2 text-charcoal font-montserrat text-sm focus:outline-none focus:border-charcoal transition-colors duration-300 peer" placeholder=" " required>
-                            <label for="email" class="absolute left-0 top-2 text-charcoal/50 font-montserrat text-xs tracking-wider uppercase transition-all duration-300 peer-focus:-top-4 peer-focus:text-[10px] peer-valid:-top-4 peer-valid:text-[10px]">Email Address</label>
-                        </div>
-                    </div>
+                <div>
+                    <label class="block text-xs tracking-[0.2em] uppercase text-[#2C2C2C]/60 mb-4">Number of Guests</label>
+                    <input type="number" name="pax" value="{{ old('pax') }}" min="1" placeholder="例: 2"
+                           class="w-full bg-transparent border-b border-[#2C2C2C]/30 pb-4 text-lg focus:border-[#2C2C2C] outline-none transition-colors">
+                    @error('pax') <p class="text-red-500 text-xs tracking-widest mt-2">{{ $message }}</p> @enderror
+                </div>
 
-                    <div class="relative">
-                        <textarea id="message" name="message" rows="3" class="w-full bg-transparent border-b border-charcoal/20 py-2 text-charcoal font-montserrat text-sm focus:outline-none focus:border-charcoal transition-colors duration-300 peer resize-none" placeholder=" " required></textarea>
-                        <label for="message" class="absolute left-0 top-2 text-charcoal/50 font-montserrat text-xs tracking-wider uppercase transition-all duration-300 peer-focus:-top-4 peer-focus:text-[10px] peer-valid:-top-4 peer-valid:text-[10px]">Special Requests or Questions</label>
-                    </div>
+                <div>
+                    <label class="block text-xs tracking-[0.2em] uppercase text-[#2C2C2C]/60 mb-4">Your Preferences</label>
+                    <textarea name="message" rows="4" placeholder="どんな体験をご希望ですか？（例：ゆったり過ごしたい、写真撮影をメインにしたい等）"
+                              class="w-full bg-transparent border-b border-[#2C2C2C]/30 pb-4 text-lg leading-relaxed focus:border-[#2C2C2C] outline-none transition-colors resize-none">{{ old('message') }}</textarea>
+                    @error('message') <p class="text-red-500 text-xs tracking-widest mt-2">{{ $message }}</p> @enderror
+                </div>
 
-                    <div class="pt-4 text-center">
-                        <button type="submit" class="w-full md:w-auto px-12 py-4 bg-charcoal text-white text-xs font-montserrat tracking-[0.2em] uppercase hover:bg-black transition-colors duration-300">
-                            Send Inquiry
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <div class="mt-8 text-center">
+                    <button type="submit" class="group flex items-center justify-center gap-6 mx-auto hover:opacity-50 transition-opacity">
+                        <span class="text-sm md:text-base tracking-[0.3em] uppercase">Request Proposal</span>
+                        <div class="w-12 h-[1px] bg-[#2C2C2C] group-hover:w-24 transition-all duration-500"></div>
+                    </button>
+                </div>
+            </form>
         </div>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 要素の取得
-            const modal = document.getElementById('inquireModal');
-            const modalContent = document.getElementById('modalContent');
-            const backdrop = document.getElementById('modalBackdrop');
-            const closeBtn = document.getElementById('closeModalBtn');
-            
-            // ページ内にある「Inquire About This Experience」ボタンにIDを追加するか、クラスで取得します
-            // （※元のボタンに id="openModalBtn" を追加してください）
-            const openBtn = document.getElementById('openModalBtn');
+    </section>
 
-            // 開く処理
-            openBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                modal.classList.remove('hidden');
-                // 少しだけ遅らせてopacityを1にすることで、CSSのtransitionを効かせる
-                setTimeout(() => {
-                    modal.classList.remove('opacity-0');
-                    modalContent.classList.remove('scale-95');
-                    modalContent.classList.add('scale-100');
-                }, 10);
-            });
-
-            // 閉じる処理の関数
-            const closeModal = function() {
-                modal.classList.add('opacity-0');
-                modalContent.classList.remove('scale-100');
-                modalContent.classList.add('scale-95');
-                // アニメーションが終わってからhiddenを追加する
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                }, 500); // duration-500 と合わせる
-            };
-
-            // 閉じるボタンと背景クリックで閉じるようにする
-            closeBtn.addEventListener('click', closeModal);
-            backdrop.addEventListener('click', closeModal);
-        });
-    </script>
 </body>
 </html>

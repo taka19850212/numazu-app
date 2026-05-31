@@ -20,4 +20,5 @@ Route::delete('/spots/{spot}', [SpotController::class, 'destroy'])->name('spots.
 Route::get('/spots/{spot}/edit', [SpotController::class, 'edit'])->name('spots.edit');
 Route::put('/spots/{spot}', [SpotController::class, 'update'])->name('spots.update');
 Route::get('/spots/{spot}', [SpotController::class, 'show'])->name('spots.show');
+Route::post('/spots/{spot}/reserve', [SpotController::class, 'reserve'])->name('spots.reserve');
 Route::post('/bookmarks/toggle/{spot}', [BookmarkController::class, 'toggle'])->name('bookmarks.toggle');
