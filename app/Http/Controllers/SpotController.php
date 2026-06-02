@@ -6,6 +6,7 @@ use App\Models\Spot;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Http\Requests\ReserveConsultationRequest;
+use App\Models\Reservation;
 
 class SpotController extends Controller
 {
@@ -113,12 +114,20 @@ class SpotController extends Controller
     {
         return view('spots.show', compact('spot'));
     }
+  // ★修正：予約保存処理
     public function reserve(ReserveConsultationRequest $request, Spot $spot)
     {
-        // ※将来はここでデータベースに保存したり、メールを送ったりします
-        // 今回は「成功しました」というメッセージと共に、元のページに戻す処理だけ書きます
+        // データベースに新しい予約データを保存
+        Reservation::create([
+            'spot_id' => $spot->id,
+            'date'    => $request->date,
+            'email'   => $request->email,
+            'pax'     => $request->pax,
+            'message' => $request->message,
+        ]);
 
-        return back()->with('success', 'ご相談リクエストを承りました。後ほど、担当ガイドより特別なご提案をお送りいたします。');
+        // ★修正：元の画面に戻すのではなく、新しく作ったサンクスページへ確実に飛ばす！
+        return redirect()->route('spots.thanks');
     }
 }
 

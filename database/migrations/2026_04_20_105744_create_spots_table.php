@@ -17,6 +17,9 @@ return new class extends Migration
             $table->text('description')->nullable(); // スポットの説明文
             $table->string('image_path')->nullable(); // 画像の保存場所
             $table->string('address')->nullable(); // 住所や場所のヒント
+            $table->boolean('is_halal_friendly')->default(false);
+            $table->boolean('is_private_booking')->default(false);
+            $table->boolean('is_english_friendly')->default(false);
             $table->timestamps();
         });
     }

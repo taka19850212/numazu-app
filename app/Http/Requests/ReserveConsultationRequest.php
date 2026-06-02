@@ -17,6 +17,7 @@ class ReserveConsultationRequest extends FormRequest
         return [
             // 必須、日付形式、今日以降の日付しか許さない
             'date' => 'required|date|after_or_equal:today',
+            'email' => 'required|email',
             // 必須、数字、1人以上10人以下
             'pax' => 'required|integer|min:1|max:10',
             // 必須、文字列、1000文字以内
@@ -30,6 +31,8 @@ class ReserveConsultationRequest extends FormRequest
         return [
             'date.required' => 'ご希望日を選択してください。',
             'date.after_or_equal' => '本日以降の日付をご選択ください。',
+            'email.required' => 'メールアドレスをご入力ください。',
+            'email.email' => '正しいメールアドレスの形式でご入力ください。',
             'pax.required' => '参加人数をご入力ください。',
             'pax.min' => '1名様以上でご入力ください。',
             'message.required' => 'ご希望の旅行スタイルやメッセージをご入力ください。',

@@ -9,16 +9,21 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('bookmarks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->casscadeOnDelete();
-            $table->foreignId('spot_id')->constrained()->casscadeOnDelete();
-
+            // 誰がお気に入りしたか（usersテーブルと紐付け）
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            // どのスポットをお気に入りしたか（spotsテーブルと紐付け）
+            $table->foreignId('spot_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
+
+            // 同じ人が同じスポットを2回以上お気に入りできないように安全装置をかける
+            $table->unique(['user_id', 'spot_id']);
         });
     }
+    
 
     /**
      * Reverse the migrations.
